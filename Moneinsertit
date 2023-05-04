@@ -1,0 +1,36 @@
+import monetdb.sql as monetdb
+
+from datetime import datetime
+
+# Connect to the MonetDB database
+
+conn = monetdb.connect(username="username", password="password", hostname="localhost", database="mydatabase")
+
+# Create a cursor object
+
+cursor = conn.cursor()
+
+# Check if the other table has type='x' and status='success'
+
+query = "SELECT COUNT(*) FROM othertable WHERE type='x' AND status='success'"
+
+cursor.execute(query)
+
+result = cursor.fetchone()[0]
+
+# If the condition is satisfied, insert a flag as 1 and utcnow() into the audit table
+
+if result > 0:
+
+    query = "INSERT INTO audittable (flag, timestamp) VALUES (1, '{}')".format(datetime.utcnow())
+
+    cursor.execute(query)
+
+    conn.commit()
+
+# Close the cursor and connection
+
+cursor.close()
+
+conn.close()
+
